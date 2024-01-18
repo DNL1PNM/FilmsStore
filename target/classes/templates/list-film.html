@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Films Management System</title>
+    <!-- Используем Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+          crossorigin="anonymous">
+    <!-- Подключаем DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.25/datatables.min.css"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/about}">Films Manager System</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedUserContent"
+                aria-controls="navbarSupportedUserContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedUserContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <!-- Обновленные ссылки на страницы -->
+                <li class="nav-item"><a class="nav-link" th:href="@{/list}">Films</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/stores}">Stores</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/users}">Users</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/about}">About</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/user-logs}">Logs</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/logout}">Exit</a></li>
+                <!-- Дополнительные пункты меню могут быть добавлены по необходимости -->
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-3">
+    <hr/>
+    <a th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'') or hasRole(''ROLE_USER'')')}" th:href="@{/add-film-form}" class="btn btn-primary">Add Film</a>
+    <br/><br/>
+    <table class="table table-bordered table-striped" id="filmTable">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Price</th>
+            <th>Store</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="film : ${films}">
+            <td th:text="${film.title}"></td>
+            <td th:text="${film.author}"></td>
+            <td th:text="${film.price}"></td>
+            <td>
+                <span th:each="filmStore: ${film.filmStore}">
+                    <span th:text="${filmStore.store.name}"/>
+                </span>
+            </td>
+            <td>
+                <a th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'') or hasRole(''ROLE_USER'')')}" th:href="@{/showUpdateForm(filmId=${film.id})}" class="btn btn-info">Update</a>
+                <a th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'') or hasRole(''ROLE_USER'')')}" th:href="@{/deleteFilm(filmId=${film.id})}" class="btn btn-danger ml-2">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Подключаем jQuery и DataTables JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/v/bs4/dt-1.10.25/datatables.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Инициализация DataTables с отключением сортировки для последней колонки (Actions)
+        $("#filmTable").DataTable({
+            'aoColumnDefs': [{
+                'bSortable': false,
+                'aTargets': [-1] // Отключение сортировки для последней колонки (действия)
+            }]
+        });
+    })
+</script>
+</body>
+</html>
